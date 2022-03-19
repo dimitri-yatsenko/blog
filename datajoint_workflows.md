@@ -1,4 +1,4 @@
-**Duration:** 8min
+**Duration:** 8min read
 
 **Release:** Thursday, 2022-03-24
 
