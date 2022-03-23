@@ -1,4 +1,4 @@
-**Duration Target:** 8min read (@160 wpm)
+**Duration Target:** 14min read (@160 wpm)
 
 **Release:** Thursday, 2022-03-24
 
