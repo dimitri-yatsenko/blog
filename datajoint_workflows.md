@@ -1,10 +1,10 @@
-# Workflow Orchestration for DataJoint
+# Workflow Management for DataJoint
 
 **Duration Target:** 14min read (@160 wpm)
 
 **Release:** Thursday, 2022-03-24
 
-**Authors**: Raphael Guzman and Dimitri Yatsenko
+**Authors**: Raphael Guzman, Thinh Nguyen, and Dimitri Yatsenko
 
 ## Definition 
 Let's agree on a few  definitions:
@@ -87,9 +87,13 @@ Data integrity constraints prevent many errors.
 - **Interoperability**: Much of the scientific community participates in both the Python and MATLAB ecosystem such that there are excellent open-source projects across them. Choosing to support both communities, we created clients in both enforcing interoperability between them. Meaning that a user could serialize data in one and exchange with the other. This further promotes collaboration through hybrid **data pipelines** that can define some computations to be carried out in Python and some in MATLAB.
 
 ## Workflow management in DataJoint 
-Currently, the DataJoint **data pipeline** operation is scriptable but still largely a manual effort. DataJoint expects the machine where the pipeline is defined to operate as a worker to process jobs. Through `.populate()` we are able to process in bulk jobs within a table but organizing a pipeline-wide populate is largely on the responsibility of the user (currently). Additionally, retrieving logs, debugging, and restarting failed runs is quite involved where DataJoint expects the user to know their way around the infrastructure.
+DataJoint comes with a built-in lightweight workflow management process in its `populate` method. 
+This allows coordinating the computations across multiple nodes. 
+This process works for projects of medium sizes. 
+However, this process lacks many of the capabilities of modern workflow management systems. 
 
-Each of these topics on their own could easily serve as the focus for a dedicated blog and perhaps we'll go deeper into them in the future. That said, we can just expand a bit further on how we may improve on the workflow management experience with the DataJoint open-source framework.
+
+Currently, the DataJoint **data pipeline** operation is scriptable but still largely a manual effort. DataJoint expects the machine where the pipeline is defined to operate as a worker to process jobs. Through `.populate()` we are able to process in bulk jobs within a table but organizing a pipeline-wide populate is largely on the responsibility of the user (currently). Additionally, retrieving logs, debugging, and restarting failed runs is quite involved where DataJoint expects the user to know their way around the infrastructure.
 
 ## Minding the Gap
 
