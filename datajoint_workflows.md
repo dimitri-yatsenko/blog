@@ -1,4 +1,4 @@
-# DataJoint Roadmap for Workflow Orchestration
+# Workflow Orchestration for DataJoint
 
 **Duration Target:** 14min read (@160 wpm)
 
@@ -9,7 +9,6 @@
 ## Definition 
 Let's agree on a few  definitions:
 
-### Jobs
 A **job** is a fully-specified request to perform a computation or task in a deterministic manner
 
 Jobs should be specified in their entirety so that they can achieve consistent results in a predictable timeframe. Reliability is achieved if results can be reproduced and independently verifed.
@@ -50,7 +49,7 @@ Naturally, users will need to interact with these facilities to perform work. Th
 
 Returing to our example, using a workflow management tool would be how we might define our workflow's jobs and set the workflow to be triggered once a day. Though largely automated now, we'd be wise if during processing we assign someone to be on-call should intervention be necessary.
 
-Now a **data pipeline** is somewhat different conceptually.  
+A **data pipeline** is somet different conceptually.  
 It is the formal specification of the data sources, transformations, and all its intermediate structures.
 It also takes the form of a directed acyclic graph of dependencies. 
 In many cases, the data pipeline provides the basis for the *workflows*.
@@ -67,15 +66,19 @@ To complete our example, our larger effort might be that we are conducting a beh
 - workflow: add pose tracking to videos and update metadata, input: utilize a specific algorithm
 - workflow: generate graphs and figures for publication, input: curated list of session data
 
-## DataJoint's Approach
+## Data Pipelines in DataJoint
+DataJoint is the framework for a formal specification of data pipelines. 
+It does so using the principles of relational databases. 
+When relational schemas are restricted to acyclic relationships through foreign key dependencies, then such a schema can serve as both a database and a data pipeline. 
+DataJoint tables can specify the computations tied to their referential dependencies. 
 
-When we designed the DataJoint framework, there were several key principles we wanted to adhere to that we felt were either missing or reduced in significance in the management of computation at the time; primarily within neuroscience. Our approach is to empower the user to create and manage relational **data pipelines**. If you are not familiar with the DataJoint framework, please see [this](https://datajoint.org) or initial paper.
+- **Data Consistency**: Establishing a single-source-of-truth is a primary requirement within a reseaerch team. 
+Proper database systems help avoid data anomalies that arise from concurrent data manipulations by the team.
 
-- **Collaboration**: Establishing a single-source-of-truth is the gateway to devising standards and best practices within a team. Thus, it felt natural to rely on a relational database to help bring organization to science. This allowed for greater conversations throughout teams facilitating agreement on structure setting the stage for future automation.
+- **Data integrity**: Understanding the lineage of your data, its origins and relationships is essential. DataJoint uses relational data integrity constraints for ensuring entity integrity, referential integrity, and group integrity in the data pipleines.
+Data integrity constraints prevent many errors.
 
-- **Data Provenance**: Understanding the lineage of your data, where it originated from, and how it relates to downstream data is essential in any tracing effort. Tracibility here provided several benefits. Both in debugging where erronious data was introduced but also where areas of interest exist within the **data pipeline**.
-
-- **(*partial*) Reproducibility**: Making computation a native, natural part of the user's experience with their data model allowed us many benefits. Foreign key relationships facilitated data provenance and referential integrity. This paved the way for automation as we included the feature to attach distributed computation to specific table types. This proved to be a reliable way to determine if automated tables needed to perform new computations. The goal was to ensure reproducibility though I will admit this is *partially* in place since compute environments are not completely defined for full reproducibility.
+- **Reproducibility**: Making computation a native, natural part of the user's experience with their data model allowed us many benefits. Foreign key relationships facilitate data provenance and referential integrity. This paves the way for automation as we included the feature to attach distributed computation to specific table types. This proves to be a reliable way to determine if automated tables needed to perform new computations. The goal is to ensure reproducibility though I will admit this is *partially* in place since compute environments are not completely defined for full reproducibility.
 
 - **Quickstart**: Nothing is more frustrating that wanting to try a new approach to a compute workflow but getting bogged down by a clunky, convoluted setup. We felt it important to keep things as simple as possible by building client packages in pure Python or MATLAB easily installable on a local machine. 
 
@@ -83,21 +86,8 @@ When we designed the DataJoint framework, there were several key principles we w
 
 - **Interoperability**: Much of the scientific community participates in both the Python and MATLAB ecosystem such that there are excellent open-source projects across them. Choosing to support both communities, we created clients in both enforcing interoperability between them. Meaning that a user could serialize data in one and exchange with the other. This further promotes collaboration through hybrid **data pipelines** that can define some computations to be carried out in Python and some in MATLAB.
 
-## DataJoint' current gaps
-
-However, we are all not without our flaws. As great as it may be to help teams on their compute journey through DataJoint **data pipelines**, we have identified areas where we simply could do better.
-
-As the saying goes:
-
-> Problems almost always create opportunities - to learn, grow and improve.
-> 
->  *John C. Maxwell*
-
-- **Online Schema Migration**: Currently DataJoint **data pipelines** are a bit too "rigid". You are free to extend and create near the bottom but it is a bit more challenging to make changes to your pipeline near the top. We do currently have support for some `.alter()` operations on tables allowing you the add, rename, or delete attributes but we do not currently support making more involved changes such as modifying the primary or foreign keys. We do have a set of best practices to allow greater flexibility that we've evolved from our history of working with research labs but in general it is still particularly important to make such considerations early on in your pipeline design.
-- **File Management**: Although we support certain data types that can be stored externally in a filesystem or S3, working with external data is still a bit too involved. Additionally, since external storage configuration is managed via `dj.config`, there is an additional overhead on the user to ensure they are in sync with their colleagues. In general, there is room for improvement of the user experience and how we extend the DataJoint philosophy to external files.
-- **Distributed Database Deployment**: There has been great progress in the PostgreSQL community in recent years specially with the surgence of NewSQL systems such as CockroachDB and YugabyteDB. With the revolution of containers and the disruption of container orchestration led by Kubernetes in the years past, distributed systems have proven to be resilient, fault-tolerant, highly-available, and dynamically autoscallable. We've been using Kubernetes for years for stateless workloads but are still evaluating/benchmarking it for production database use-cases. Unfortunately, DataJoint currently "speaks" the MySQL dialect of SQL in its backend and there have not been many compatible NewSQL options with support for foreign keys. We've been heavily exploring various approaches to achieving a true distributed database experience. 
-- **Feature Parity**: Though DataJoint clients exist for both Python and MATLAB, their codebases are maintained entirely separately. This creates a high-maintenance overhead for the team and makes it more challenging to achieve proper feature parity. We've been working to address this by consolidating around a combination of a common core and thin clients to help drive quicker fixes and achieve performance gains. More to come on this.
-- **Workflow Management**: Currently, the DataJoint **data pipeline** operation is scriptable but still largely a manual effort. DataJoint expects the machine where the pipeline is defined to operate as a worker to process jobs. Through `.populate()` we are able to process in bulk jobs within a table but organizing a pipeline-wide populate is largely on the responsibility of the user (currently). Additionally, retrieving logs, debugging, and restarting failed runs is quite involved where DataJoint expects the user to know their way around the infrastructure.
+## Workflow management in DataJoint 
+Currently, the DataJoint **data pipeline** operation is scriptable but still largely a manual effort. DataJoint expects the machine where the pipeline is defined to operate as a worker to process jobs. Through `.populate()` we are able to process in bulk jobs within a table but organizing a pipeline-wide populate is largely on the responsibility of the user (currently). Additionally, retrieving logs, debugging, and restarting failed runs is quite involved where DataJoint expects the user to know their way around the infrastructure.
 
 Each of these topics on their own could easily serve as the focus for a dedicated blog and perhaps we'll go deeper into them in the future. That said, we can just expand a bit further on how we may improve on the workflow management experience with the DataJoint open-source framework.
 
