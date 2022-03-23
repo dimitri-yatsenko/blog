@@ -1,51 +1,46 @@
+# DataJoint Roadmap for Workflow Orchestration
+
 **Duration Target:** 14min read (@160 wpm)
 
 **Release:** Thursday, 2022-03-24
 
-**Title:** Blog Title
+**Authors**: Raphael Guzman and Dimitri Yatsenko
 
-## [DRAFT] Intro
-- something clever/attention-grabbing
-- soften tone to be open-minded as an opinionated discussion follows
+## Definition 
+Let's agree on a few  definitions:
 
-## Terms
+### Jobs
+A **job** is a fully-specified request to perform a computation or task in a deterministic manner
 
-Before we get too ahead of ourselves, it might be best to establish a set of definitions to help guide the message presented here so we can agree on a common language.
+Jobs should be specified in their entirety so that they can achieve consistent results in a predictable timeframe. Reliability is achieved if results can be reproduced and independently verifed.
 
-*a **job** is a fully-specified request to perform a computation or task in a deterministic manner*
+Consider a job that responsible for compiling a `plotly` graph from some input data. For reliable results, we need to answer several questions:
 
-The idea is that jobs should be specified in their entirety such that they can achieve consistent results in a predictable timeframe. Reliability is achieved if results can be reproduced and independently verifed.
+- What version of `plotly` and all its dependencies will we use?
+- What is the input data and the processing parameters?
+- What hardware resources should we allocate? CPU? GPU? RAM? What operating system and hardware architecture?
+- How can the job be parallelized through multithreading and multiprocessing?
 
-For instance, let's say I have a job that is responsible for compiling a `plotly` graph based on some input data. To reliability achieve similar results, there are several questions we need to pin down. To name a few:
+These last questions may not affect the final result but they do affect the run time.  Answering these questions leads to the predictability of computation results and execution times.
 
-- What version of `plotly` show we use?
-- What are the versions of all of `plotly`'s dependencies?
-- What is the input data?
-- What hardware resources should we allocate? CPU? GPU? RAM?
-- Which processing architecture was used? AMD64? ARM64?
-- Was multiprocessing, multithreaded used? What were the parameters?
-- What operating system was used?
+A **workflow** is the formal specification of the dependency relationship between jobs
 
-Though some of these last questions may not affect the final result, they can affect the duration in which a job is performed. By capturing these properly, we can provide with greater confidence estimates of both the expected results and duration.
+Workflows provide instructions for cascading dependent computations or tasks. We can chain jobs together in this way to organize how inputs transform into results through various stages of a workflow. These acyclic relationships are important because they define a specific direction and a finite end to the operation. This is commonly depicted with a directed acyclic graph (DAG).
 
-*a **workflow** defines the acyclic relationship of many jobs to each other*
+Continuing with our example, we define two jobs that will consume the generated `plotly` graph: 
 
-In other words, workflows provide instructions for cascading dependent computations or tasks. We can chain jobs together in this way to organize how inputs transform into results through various stages of a workflow. These acyclic relationships are important because they define a specific direction and a finite end to the operation. This is commonly depicted with a directed acyclic graph (DAG).
-
-Continuing from the above example, we could define two jobs that will consume the generated `plotly` graph. Perhaps jobs that would:
-
-- embed the graph within a provided text input (say for a report)
+- embed the plot within a provided text input (say for a report)
 - log the activity to a central service
 
-Here we've described a workflow with one parent job and two children jobs.
+This workflow has one parent job and two children jobs.
 
-***job orchestration** is the process of delegating jobs to both an available and appropriate computing resource*
+Then **job orchestration** is the process of delegating jobs to both an available and appropriate computing resource.
 
-Think of the job orchestrator layer as a matchmaker of sorts. By listening to a job queue, her responsibility is to connect the right job to the right environment; best fit for the job. Notice that the notion of a workflow here really isn't necessary since all we are doing is scheduling and fullfilling computing obligations. This means that as we process the queue, we either need to spawn an environment suitable for the job or wait until there is bandwidth within the landscape (remote or on-premise) to launch it.
+Think of the job orchestrator layer as a matchmaker of sorts. By listening to a *job queue*, her responsibility is to connect the right job to the right environment; best fit for the job. Notice that the notion of a workflow here really isn't necessary since all we are doing is scheduling and fullfilling computing obligations. This means that as we process the queue, we either need to spawn an environment suitable for the job or wait until there is bandwidth within the landscape (remote or on-premise) to launch it.
 
 Perhaps in our example we'd like for our jobs to be run within a distributed Kubernetes cluster. Jobs could be encapsulated in pods scheduled against nodes that satisfy the hardware requirements.
 
-***workflow management** is an interface (graphical or programatic) that enables workflow specification and job queueing*
+**Workflow Management** is an interface (graphical or programatic) that enables workflow specification and job queueing
 
 Naturally, users will need to interact with these facilities to perform work. This is usually done through the use of a workflow management tool or service. Their role is to simplify how a user defines workflows and submits them to the job orchestrator. Through the use of a combination of a UI and/or a API, the user typically gains control of:
 
@@ -55,7 +50,10 @@ Naturally, users will need to interact with these facilities to perform work. Th
 
 Returing to our example, using a workflow management tool would be how we might define our workflow's jobs and set the workflow to be triggered once a day. Though largely automated now, we'd be wise if during processing we assign someone to be on-call should intervention be necessary.
 
-*a **data pipeline** establishes the acyclic relationship between workflows separated only by necessary input parameters, provided by users, achieving a complete goal*
+Now a **data pipeline** is somewhat different conceptually.  
+It is the formal specification of the data sources, transformations, and all its intermediate structures.
+It also takes the form of a directed acyclic graph of dependencies. 
+In many cases, the data pipeline provides the basis for the *workflows*.
 
 By now we've defined a nicely determistic system but there is one key issue. Workflows on their own don't appropriately summarize a goal. Generally, they describe a chaining flow of operations or a series of steps within a wider collective effort. As such, they might not clearly represent what the true mission is. Additionally, a workflow expects all inputs to be defined in the same breath to kick-start the process. To help tie things together, it is necessary to consider a data pipeline. A data pipeline strings together multiple workflows to clearly indicate:
 
@@ -69,9 +67,9 @@ To complete our example, our larger effort might be that we are conducting a beh
 - workflow: add pose tracking to videos and update metadata, input: utilize a specific algorithm
 - workflow: generate graphs and figures for publication, input: curated list of session data
 
-## DataJoint OSS' Strengths
+## DataJoint's Approach
 
-When we started the DataJoint open-source framework back in 2011, there were several key principles we wanted to adhere to that we felt were either missing or reduced in significance in the management of computation at the time; primarily within neuroscience. Our approach is to empower the user to create and manage relational **data pipelines**. If you are not familiar with the DataJoint open-source framework, we ecourage you to go and check out [this](https://datajoint.org or initial paper) first.
+When we designed the DataJoint framework, there were several key principles we wanted to adhere to that we felt were either missing or reduced in significance in the management of computation at the time; primarily within neuroscience. Our approach is to empower the user to create and manage relational **data pipelines**. If you are not familiar with the DataJoint framework, please see [this](https://datajoint.org) or initial paper.
 
 - **Collaboration**: Establishing a single-source-of-truth is the gateway to devising standards and best practices within a team. Thus, it felt natural to rely on a relational database to help bring organization to science. This allowed for greater conversations throughout teams facilitating agreement on structure setting the stage for future automation.
 
@@ -85,7 +83,7 @@ When we started the DataJoint open-source framework back in 2011, there were sev
 
 - **Interoperability**: Much of the scientific community participates in both the Python and MATLAB ecosystem such that there are excellent open-source projects across them. Choosing to support both communities, we created clients in both enforcing interoperability between them. Meaning that a user could serialize data in one and exchange with the other. This further promotes collaboration through hybrid **data pipelines** that can define some computations to be carried out in Python and some in MATLAB.
 
-## DataJoint OSS' Weaknesses
+## DataJoint' current gaps
 
 However, we are all not without our flaws. As great as it may be to help teams on their compute journey through DataJoint **data pipelines**, we have identified areas where we simply could do better.
 
