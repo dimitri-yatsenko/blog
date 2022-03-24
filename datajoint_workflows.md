@@ -6,8 +6,18 @@
 
 **Authors**: Raphael Guzman, Thinh Nguyen, and Dimitri Yatsenko
 
-## Definition 
-Let's agree on a few  definitions:
+## Definitions
+
+We will first clarify a few definitions for the purpose of this discussion.
+
+A **data pipeline** is the formal specification of a set of data transformations. 
+It includes data acquisition/extraction, multiple stages of processing, and the structured storage of the intermediate and final results. 
+A data pipline takes the form of a directed acyclic graph (DAG) of dependencies. 
+
+DataJoint is the framework for defining data pipelines. 
+It does so using the principles of relational databases. 
+Each table represents a node in the pipeline including any computations to be performed for the data in the pipeline. 
+
 
 A **job** is a fully-specified request to perform a computation or task in a deterministic manner
 
@@ -24,7 +34,7 @@ These last questions may not affect the final result but they do affect the run 
 
 A **workflow** is the formal specification of the dependency relationship between jobs
 
-Workflows provide instructions for cascading dependent computations or tasks. We can chain jobs together in this way to organize how inputs transform into results through various stages of a workflow. These acyclic relationships are important because they define a specific direction and a finite end to the operation. This is commonly depicted with a directed acyclic graph (DAG).
+Workflows provide instructions for cascading dependent computations. We can chain jobs together in this way to organize how inputs transform into results through various stages of a workflow. These acyclic relationships are important because they define a specific direction and a finite end to the operation. This is commonly depicted with a directed acyclic graph (DAG).
 
 Continuing with our example, we define two jobs that will consume the generated `plotly` graph: 
 
@@ -49,10 +59,6 @@ Naturally, users will need to interact with these facilities to perform work. Th
 
 Returing to our example, using a workflow management tool would be how we might define our workflow's jobs and set the workflow to be triggered once a day. Though largely automated now, we'd be wise if during processing we assign someone to be on-call should intervention be necessary.
 
-A **data pipeline** is somet different conceptually.  
-It is the formal specification of the data sources, transformations, and all its intermediate structures.
-It also takes the form of a directed acyclic graph of dependencies. 
-In many cases, the data pipeline provides the basis for the *workflows*.
 
 By now we've defined a nicely determistic system but there is one key issue. Workflows on their own don't appropriately summarize a goal. Generally, they describe a chaining flow of operations or a series of steps within a wider collective effort. As such, they might not clearly represent what the true mission is. Additionally, a workflow expects all inputs to be defined in the same breath to kick-start the process. To help tie things together, it is necessary to consider a data pipeline. A data pipeline strings together multiple workflows to clearly indicate:
 
@@ -67,10 +73,6 @@ To complete our example, our larger effort might be that we are conducting a beh
 - workflow: generate graphs and figures for publication, input: curated list of session data
 
 ## Data Pipelines in DataJoint
-DataJoint is the framework for a formal specification of data pipelines. 
-It does so using the principles of relational databases. 
-When relational schemas are restricted to acyclic relationships through foreign key dependencies, then such a schema can serve as both a database and a data pipeline. 
-DataJoint tables can specify the computations tied to their referential dependencies. 
 
 - **Data Consistency**: Establishing a single-source-of-truth is a primary requirement within a reseaerch team. 
 Proper database systems help avoid data anomalies that arise from concurrent data manipulations by the team.
